@@ -349,7 +349,7 @@ class Game(GameGraphics):
                     self.remove_edge(edge)
                     break
             else:
-                edge = self.edges.pop()
+                edge = self.edges.pop(0)
         if edge:
             assert self.graph.is_connected(edge) == False
             print('Returned edge: %s' %edge)
