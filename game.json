@@ -1,0 +1,9 @@
+{ 
+  "rows" : 5,
+  "cols" : 5,
+  "width": 1440,
+  "height" : 900,
+  "spacing" : 12,
+  "col_width" : 100,
+  "row_width" : 100
+}
