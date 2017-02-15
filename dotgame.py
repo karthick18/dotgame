@@ -19,7 +19,6 @@ class GameGraphics(object):
         pygame.font.init()
         self.screen = pygame.display.set_mode( (width, height) )
         self.clock = pygame.time.Clock()
-        self.line_buffer = []
         self.boxes = []
         self.grids = []
         self.grids_taken_list = []
@@ -27,9 +26,6 @@ class GameGraphics(object):
         self.row_width = row_width
         self.spacing = spacing
         self.text_font = pygame.font.SysFont(pygame.font.get_default_font(), 30)
-
-    def add_line(self, color, r1, c1, r2, c2):
-        self.line_buffer.append( [ False, color, (r1, c1), (r2, c2) ] )
 
     def find_grid(self, c, r):
         rows, cols = self.rows, self.cols
@@ -42,7 +38,7 @@ class GameGraphics(object):
         row_index = r/self.row_width - 1
         col_index = c/self.col_width - 1
         match_index = None
-        print('Row index %d, column index %d' %(row_index, col_index))
+        #print('Row index %d, column index %d' %(row_index, col_index))
         grid_map = [ (row_index, col_index, row_index+1, col_index),
                      (row_index, col_index, row_index, col_index+1),
                      (row_index, col_index+1, row_index+1, col_index+1),
@@ -56,8 +52,8 @@ class GameGraphics(object):
                                                              (c2+1)*self.col_width + spacing, (r2+1)*self.row_width + spacing
             spacing_map.append( (spacing_c1, spacing_r1, spacing_c2, spacing_r2) )
 
-        print('Spacing map: %s' %spacing_map)
-        print('Grid map: %s' %grid_map)
+        #print('Spacing map: %s' %spacing_map)
+        #print('Grid map: %s' %grid_map)
         for i in xrange(len(grid_map)):
             c1, r1, c2, r2 = spacing_map[i]
             if c1 <= c and c2 >= c and r1 <= r and r2 >= r:
@@ -65,10 +61,11 @@ class GameGraphics(object):
                 break
 
         if match_index is not None:
-            print('Matched index: %d %d' %(row_index, col_index))
-            print('Matched grid: %s' %(str (grid_map[match_index]) ) )
-            print('Matched spacing: %s' %(str (spacing_map[match_index]) ) )
+            #print('Matched index: %d %d' %(row_index, col_index))
+            #print('Matched grid: %s' %(str (grid_map[match_index]) ) )
+            #print('Matched spacing: %s' %(str (spacing_map[match_index]) ) )
             return grid_map[match_index]
+
         #if nothing matched, ask for input again
         print('No matches for pos: %d/%d' %(c, r))
         return None
