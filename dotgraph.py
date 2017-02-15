@@ -1,6 +1,44 @@
 import sys
 from collections import defaultdict
 
+def heapify(arr):
+
+    def parent(index):
+        if index == 0:
+            return index
+        return (index-1)/2
+
+    def left_child(index):
+        return 2*index + 1
+
+    def right_child(index):
+        return 2*index + 2
+
+    def swap(arr, i, j):
+        arr[i], arr[j] = arr[j], arr[i]
+
+    def sift_down(arr, start, end):
+        root = start
+        while left_child(root) <= end:
+            target = root
+            child = left_child(root)
+            if arr[target] < arr[child]:
+                target = child
+            if child + 1 <= end and arr[target] < arr[child+1]:
+                target = child+1
+            if target == root:
+                return
+            swap(arr, root, target)
+            root = target
+
+    count = len(arr)-1
+    if count < 1:
+        return
+    start = parent(count)
+    while start >= 0:
+        sift_down(arr, start, count)
+        start -= 1
+
 class Vertex(object):
     def __init__(self, row, col, weight = 0):
         self.row = row
@@ -55,17 +93,13 @@ class Edge(object):
 
     def __cmp__(self, obj):
         assert isinstance(obj, Edge)
-        diff_row1, diff_row2 = self.v1.row - obj.v1.row, self.v2.row - obj.v2.row
-        diff_col1, diff_col2 = self.v1.col - obj.v1.col, self.v1.col - obj.v1.col
-        diff_row = diff_row1 - diff_row2
-        diff_col = diff_col1 - diff_col2
-        if diff_row < 0:
+        if self.v1 < obj.v1:
             return -1
-        elif diff_row > 0:
+        elif self.v1 > obj.v1:
             return 1
-        elif diff_col < 0:
+        elif self.v2 < obj.v2:
             return -1
-        elif diff_col > 0:
+        elif self.v2 > obj.v2:
             return 1
         return 0
 
@@ -120,47 +154,10 @@ class Graph(object):
     def add(self, edge):
         key = (edge.v1.row, edge.v1.col)
         self.graph[key].append(edge.v2)
-        self.heapify(self.graph[key])
+        heapify(self.graph[key])
         key = (edge.v2.row, edge.v2.col)
         self.graph[key].append(edge.v1)
-        self.heapify(self.graph[key])
-
-    def parent(self, index):
-        if index == 0:
-            return index
-        return (index-1)/2
-
-    def left_child(self, index):
-        return 2*index + 1
-
-    def right_child(self, index):
-        return 2*index + 2
-
-    def heapify(self, arr):
-        count = len(arr)-1
-        if count < 1:
-            return
-        start = self.parent(count)
-        while start >= 0:
-            self.sift_down(arr, start, count)
-            start -= 1
-
-    def swap(self, arr, i, j):
-        arr[i], arr[j] = arr[j], arr[i]
-
-    def sift_down(self, arr, start, end):
-        root = start
-        while self.left_child(root) <= end:
-            target = root
-            child = self.left_child(root)
-            if arr[target] < arr[child]:
-                target = child
-            if child + 1 <= end and arr[target] < arr[child+1]:
-                target = child+1
-            if target == root:
-                return
-            self.swap(arr, root, target)
-            root = target
+        heapify(self.graph[key])
 
     def is_connected(self, edge):
         key = (edge.v1.row, edge.v1.col)
@@ -175,7 +172,7 @@ class Graph(object):
                 connections.remove(vertex)
                 if first_vertex == vertex:
                     #we heapify if the first connection is removed
-                    self.heapify(connections)
+                    heapify(connections)
             except: pass
         del self.graph[ (vertex.row, vertex.col) ]
         return True
@@ -200,23 +197,33 @@ def get_all_edges(rows, cols):
     num_grids_shared = rows * (cols - 1) + cols * (rows - 1)
     num_grids -= num_grids_shared
     #print('Num grids: %d' %num_grids)
-    #lets connect the columns to each row
-    row_points = rows + 1
-    col_points = cols + 1
     connections = []
     weight = rows * cols
-    for r in xrange(0, row_points):
-        for c in xrange(0, col_points):
-            if c < cols:
-                v1 = Vertex(r, c, weight = weight)
-                v2 = Vertex(r, c+1, weight = weight)
-                connections.append(Edge(v1, v2))
 
-    for c in xrange(0, col_points):
-        for r in xrange(0, row_points):
-            if r < rows:
-                v1 = Vertex(r, c, weight = weight)
-                v2 = Vertex(r+1, c, weight = weight)
-                connections.append(Edge(v1, v2))
+    #lets connect the 1st and last rows and cols before the rest
+    for r in [ 0, rows ]:
+        for c in xrange(0, cols):
+            v1 = Vertex(r, c, weight = weight)
+            v2 = Vertex(r, c+1, weight = weight)
+            connections.append(Edge(v1, v2))
 
+    for c in [ 0, cols ]:
+        for r in xrange(0, rows):
+            v1 = Vertex(r, c, weight = weight)
+            v2 = Vertex(r+1, c, weight = weight)
+            connections.append(Edge(v1, v2))
+
+    for r in xrange(1, rows):
+        for c in xrange(0, cols):
+            v1 = Vertex(r, c, weight = weight)
+            v2 = Vertex(r, c+1, weight = weight)
+            connections.append(Edge(v1, v2))
+
+    for c in xrange(1, cols):
+        for r in xrange(0, rows):
+            v1 = Vertex(r, c, weight = weight)
+            v2 = Vertex(r+1, c, weight = weight)
+            connections.append(Edge(v1, v2))
+
+    assert len(connections) == num_grids
     return connections
