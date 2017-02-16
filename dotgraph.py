@@ -191,6 +191,23 @@ class Graph(object):
                 return new_path
         return None
 
+    def find_shortest_path(self, vertex1, vertex2, path = []):
+        path = path + [vertex1]
+        if (vertex1.row, vertex1.col) not in self.graph:
+            return None
+        if vertex1 == vertex2:
+            return path
+        shortest = None
+        for connection in self.graph[ (vertex1.row, vertex1.col) ]:
+            if connection in path:
+                continue
+            new_path = self.find_shortest_path(connection, vertex2, path)
+            if new_path:
+                if not shortest or len(new_path) < len(shortest):
+                    shortest = new_path
+
+        return shortest
+
 def get_all_edges(rows, cols):
     num_grids = rows * cols * 4
     #subtract the common edges
